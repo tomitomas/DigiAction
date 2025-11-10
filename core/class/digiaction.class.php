@@ -56,6 +56,18 @@ class digiaction extends eqLogic {
 
    public function postSave() {
 
+      $currentMode = $this->getCmd(null, 'actionDoneBy');
+      if (!is_object($currentMode)) {
+         $currentMode = new digiactionCmd();
+         $currentMode->setOrder(10);
+      }
+      $currentMode->setName(__('Dernier utilisateur', __FILE__));
+      $currentMode->setEqLogic_id($this->id);
+      $currentMode->setLogicalId('actionDoneBy');
+      $currentMode->setType('info');
+      $currentMode->setSubType('string');
+      $currentMode->save();
+
       $currentMode = $this->getCmd(null, 'currentMode');
       if (!is_object($currentMode)) {
          $currentMode = new digiactionCmd();
@@ -426,7 +438,10 @@ class digiaction extends eqLogic {
       // $replace['#message#'] = $this->getCmd(null, 'digimessage')->execCmd();
       $replace['#randomkeys#'] = $this->getConfiguration('randomkeys', 0);
 
-      return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'digiaction', 'digiaction')));
+      // return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'digiaction', 'digiaction')));
+      $html = template_replace($replace, getTemplate('core', $version, __CLASS__, __CLASS__));
+      $html = translate::exec($html, 'plugins/' . __CLASS__ . '/core/template/' . $version . '/' . __CLASS__ . '.html');
+      return $html;
    }
 
 
@@ -533,6 +548,7 @@ class digiaction extends eqLogic {
 
    public function verifCodeUser($userCode, $nextCmdId) {
       self::addLogTemplate('CHECK USER CODE');
+      $userPanic = false;
 
       try {
          // check if the new mode requires a password
@@ -796,8 +812,10 @@ class digiactionCmd extends cmd {
                $eqLogic->checkAndUpdateCmd('digimessage', $txtOK);
                if (!empty($_options['userName'])) {
                   log::add('digiaction', 'info', '│ Commande "' . $this->getName() . '" a été réalisée par : ' . $_options['userName']);
+                  $eqLogic->checkAndUpdateCmd('actionDoneBy', $_options['userName']);
                } else {
                   log::add('digiaction', 'info', '│ Commande "' . $this->getName() . '" a été réalisée (sans contrôle)');
+                  $eqLogic->checkAndUpdateCmd('actionDoneBy', '');
                }
             }
 
