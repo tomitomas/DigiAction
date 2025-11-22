@@ -23,7 +23,7 @@ class digiaction extends eqLogic {
    private static $_log_trace;
 
    public function __construct() {
-      $this->_log_trace  = self::getTrace();
+      self::$_log_trace  = self::getTrace();
    }
 
    /*
@@ -376,7 +376,7 @@ class digiaction extends eqLogic {
                   continue;
                }
 
-               log::add('digiaction', 'debug', '│ will check for panic => current cmd :' . ($options['panic'] ? 'true' : 'false') . ' // panic user : ' . ($is_panic ? 'true' : 'false'));
+               log::add('digiaction', 'debug', '│ will check for panic => current cmd :' . (($options['panic'] ?? false) ? 'true' : 'false') . ' // panic user : ' . ($is_panic ? 'true' : 'false'));
                if (isset($options['panic']) && $options['panic'] && !$is_panic) {
                   log::add('digiaction', 'debug', '│ action skipped -- not in panic mode ! ');
                   continue;
